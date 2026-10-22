@@ -43,8 +43,10 @@ body{margin:0;background:#0e0e12;color:#f1f1f4;font-family:system-ui,-apple-syst
 </div>
 
 <script>
-const UPLOAD_API = "https://videy.co/api/upload"; // FILL: kalau kena CORS, ganti ke URL worker.js-mu
-const CDN        = id => "https://cdn.videy.co/" + id + ".mp4";
+const UPLOAD_URLS = ["/api/upload", "https://videy.co/api/upload"]; // proxy Netlify dulu, cadangan langsung ke videy
+const LIST_API = "/.netlify/functions/list";
+const ADD_API  = "/.netlify/functions/add";
+const CDN      = id => "https://cdn.videy.co/" + id + ".mp4";
 
 const list = document.getElementById("list");
 const f = document.getElementById("file");
@@ -88,6 +90,26 @@ document.addEventListener("fullscreenchange", () => {
 document.getElementById("close").addEventListener("click", closeOv);
 document.addEventListener("keydown", e => { if (e.key === "Escape" && ov.classList.contains("on")) closeOv(); });
 
+// daftar video: utama di server (Netlify Blobs), cadangan localStorage
+const KEY = "videoList";
+function loadLocal(){
+  try { const a = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(a) ? a : []; }
+  catch { return []; }
+}
+function saveLocal(src){
+  try { const a = loadLocal(); a.push(src); localStorage.setItem(KEY, JSON.stringify(a)); } catch {}
+}
+async function loadAll(){
+  try {
+    const r = await fetch(LIST_API, { cache: "no-store" });
+    if (r.ok) { const a = await r.json(); if (Array.isArray(a)) return a; }
+  } catch {}
+  return loadLocal();
+}
+function saveShared(src){
+  fetch(ADD_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: src }) }).catch(() => {});
+}
+
 function addVideo(src){
   const v = document.createElement("video");
   v.playsInline = true;
@@ -98,6 +120,27 @@ function addVideo(src){
   list.appendChild(v);
 }
 
+// upload: coba URL satu per satu sampai ada yang berhasil
+function upload(file, urls, onProgress){
+  return new Promise((resolve, reject) => {
+    const [url, ...rest] = urls;
+    const fd = new FormData();
+    fd.append("file", file, file.name);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.upload.onprogress = onProgress;
+    const next = err => rest.length ? upload(file, rest, onProgress).then(resolve, reject) : reject(err);
+    xhr.onload = () => {
+      try { const id = JSON.parse(xhr.responseText).id; if (!id) throw 0; resolve(id); }
+      catch { next("gagal ambil link (status " + xhr.status + ")"); }
+    };
+    xhr.onerror = () => next("upload gagal (CORS / koneksi)");
+    xhr.send(fd);
+  });
+}
+
+loadAll().then(a => a.forEach(addVideo));
 btn.addEventListener("click", () => f.click());
 
 f.addEventListener("change", () => {
@@ -105,34 +148,21 @@ f.addEventListener("change", () => {
   f.value = "";
   if (!file) return;
 
-  const fd = new FormData();
-  fd.append("file", file, file.name);
-
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", UPLOAD_API);
-  xhr.setRequestHeader("Accept", "application/json");
   btn.disabled = true;
   msg.textContent = "mengupload 0%";
-
-  xhr.upload.onprogress = e => {
+  upload(file, UPLOAD_URLS, e => {
     if (e.lengthComputable) msg.textContent = "mengupload " + Math.round(e.loaded / e.total * 100) + "%";
-  };
-  xhr.onload = () => {
+  }).then(id => {
+    const url = CDN(id);
+    msg.textContent = "";
+    addVideo(url);
+    saveLocal(url);
+    saveShared(url);
+  }).catch(err => {
+    msg.textContent = err;
+  }).finally(() => {
     btn.disabled = false;
-    try {
-      const id = JSON.parse(xhr.responseText).id;
-      if (!id) throw 0;
-      msg.textContent = "";
-      addVideo(CDN(id));
-    } catch {
-      msg.textContent = "gagal ambil link (status " + xhr.status + ")";
-    }
-  };
-  xhr.onerror = () => {
-    btn.disabled = false;
-    msg.textContent = "upload gagal (CORS / koneksi)";
-  };
-  xhr.send(fd);
+  });
 });
 </script>
 </body>
