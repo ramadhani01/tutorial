@@ -28,7 +28,6 @@ body{margin:0;background:#0e0e12;color:#f1f1f4;font-family:system-ui,-apple-syst
   <div id="list"></div>
 </div>
 <script>
-const VIDEO_URL  = "https://cdn.videy.co/vkNgpJHF1.mp4"; // video awal
 const UPLOAD_API = "https://videy.co/api/upload";        // FILL: kalau kena CORS, ganti ke URL worker.js-mu
 const CDN        = id => "https://cdn.videy.co/" + id + ".mp4";
 
@@ -62,7 +61,6 @@ function addVideo(src){
   list.appendChild(v);
 }
 
-addVideo(VIDEO_URL);
 btn.addEventListener("click", () => f.click());
 
 f.addEventListener("change", () => {
