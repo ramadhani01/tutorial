@@ -16,6 +16,14 @@ body{margin:0;background:#0e0e12;color:#f1f1f4;font-family:system-ui,-apple-syst
 #file{display:none}
 #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
 #list video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:10px;background:#000;cursor:pointer}
+
+/* layar penuh versi potret (overlay, tidak memutar layar) */
+#ov{position:fixed;inset:0;z-index:100;background:#000;display:none}
+#ov.on{display:block}
+#ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#ov .b{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:2;width:44px;height:44px;border:0;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;font-size:1.4rem;line-height:1;cursor:pointer}
+#close{left:10px}
+#rot{right:10px;display:none}
 </style>
 </head>
 <body>
@@ -27,37 +35,66 @@ body{margin:0;background:#0e0e12;color:#f1f1f4;font-family:system-ui,-apple-syst
   </div>
   <div id="list"></div>
 </div>
+
+<div id="ov">
+  <button id="close" class="b" type="button" aria-label="tutup">&#10005;</button>
+  <button id="rot" class="b" type="button" aria-label="layar penuh landscape">&#9974;</button>
+  <video id="ovv" controls playsinline></video>
+</div>
+
 <script>
-const UPLOAD_API = "https://videy.co/api/upload";        // FILL: kalau kena CORS, ganti ke URL worker.js-mu
+const UPLOAD_API = "https://videy.co/api/upload"; // FILL: kalau kena CORS, ganti ke URL worker.js-mu
 const CDN        = id => "https://cdn.videy.co/" + id + ".mp4";
 
 const list = document.getElementById("list");
 const f = document.getElementById("file");
 const btn = document.getElementById("btn");
 const msg = document.getElementById("msg");
+const ov = document.getElementById("ov");
+const ovv = document.getElementById("ovv");
+const rot = document.getElementById("rot");
 
-function openFull(v){
-  list.querySelectorAll("video").forEach(o => { if (o !== v) o.pause(); });
-  const req = v.requestFullscreen || v.webkitRequestFullscreen;
-  if (req) req.call(v).catch(() => {});
-  else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
-  v.play().catch(() => {});
+function openOv(src){
+  list.querySelectorAll("video").forEach(o => o.pause());
+  rot.style.display = "none";
+  ovv.src = src;
+  ov.classList.add("on");
+  ovv.play().catch(() => {});
+}
+function closeOv(){
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  ovv.pause();
+  ovv.removeAttribute("src");
+  ovv.load();
+  ov.classList.remove("on");
 }
 
-document.addEventListener("fullscreenchange", () => {
-  const cur = document.fullscreenElement;
-  list.querySelectorAll("video").forEach(o => {
-    o.controls = o === cur;
-    if (o !== cur) o.pause();
-  });
+// tombol kotak cuma muncul kalau videonya landscape (16:9 dst)
+ovv.addEventListener("loadedmetadata", () => {
+  rot.style.display = ovv.videoWidth > ovv.videoHeight ? "block" : "none";
 });
+
+rot.addEventListener("click", async () => {
+  try {
+    if (ovv.requestFullscreen) await ovv.requestFullscreen();
+    else if (ovv.webkitEnterFullscreen) ovv.webkitEnterFullscreen();
+    if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {});
+  } catch {}
+});
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+});
+
+document.getElementById("close").addEventListener("click", closeOv);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && ov.classList.contains("on")) closeOv(); });
 
 function addVideo(src){
   const v = document.createElement("video");
   v.playsInline = true;
+  v.muted = true;
   v.preload = "metadata";
   v.src = src + "#t=0.1";
-  v.addEventListener("click", () => { if (!document.fullscreenElement) openFull(v); });
+  v.addEventListener("click", () => openOv(src));
   list.appendChild(v);
 }
 
