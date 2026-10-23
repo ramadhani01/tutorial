@@ -9,169 +9,50 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0B0B0D;
-  --surface:#17171A;
-  --surface2:#1F1F23;
-  --border:#2C2C30;
-  --accent:#7C3AED;
-  --accent-light:rgba(124,58,237,.15);
-  --text:#EBEBED;
-  --muted:#6B6B73;
-  --danger:#EF4444;
-  --success:#22C55E;
-  --r:8px;
+  --bg:#0B0B0D;--surface:#17171A;--surface2:#1F1F23;--border:#2C2C30;
+  --accent:#7C3AED;--text:#EBEBED;--muted:#6B6B73;--success:#22C55E;--danger:#EF4444;
 }
-html,body{
-  min-height:100%;
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  font-size:14px;
-  line-height:1.5;
-  position:relative;
-}
-
-/* ── top bar ── */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 16px;
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  background:rgba(11,11,13,.9);
-  backdrop-filter:blur(8px);
-  z-index:10;
-}
-.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--text)}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;position:relative}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,11,13,.92);backdrop-filter:blur(8px);z-index:10}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
 .brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
-.upload-btn{
-  display:flex;align-items:center;gap:6px;
-  background:var(--accent);color:#fff;
-  font-size:12px;font-weight:500;
-  padding:6px 12px;border-radius:6px;
-  border:none;cursor:pointer;
-  transition:background .15s,transform .1s;
-  white-space:nowrap;
-  position:relative;overflow:hidden;
-}
+.upload-btn{display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:500;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap;position:relative;overflow:hidden}
 .upload-btn:hover{background:#6D28D9}
 .upload-btn:active{transform:scale(.97)}
 .upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-btn svg{width:13px;height:13px;flex-shrink:0}
-
-/* ── progress toast ── */
-.prog-bar{
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--surface2);
-  border-top:1px solid var(--border);
-  padding:10px 16px 14px;
-  display:none;
-  z-index:50;
-}
+.prog-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface2);border-top:1px solid var(--border);padding:10px 16px 14px;display:none;z-index:50}
 .prog-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
 .prog-name{color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%}
 .prog-pct{color:var(--accent);font-weight:600}
 .prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent);width:0%;transition:width .25s}
 .prog-status{font-size:11px;color:var(--muted);margin-top:5px}
-
-/* ── video grid ── */
 .grid-wrap{padding:14px 16px 80px}
-.grid{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.vcard{
-  width:140px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  overflow:hidden;
-  cursor:pointer;
-  transition:border-color .15s,transform .15s;
-  flex-shrink:0;
-}
+.grid{display:flex;flex-wrap:wrap;gap:8px}
+.vcard{width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s;flex-shrink:0}
 .vcard:hover{border-color:var(--accent);transform:scale(1.02)}
-.vcard-thumb{
-  width:140px;height:79px;
-  background:#000;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-}
+.vcard-thumb{width:140px;height:79px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .vcard-thumb video{width:100%;height:100%;object-fit:cover;pointer-events:none}
-.vcard-hover{
-  position:absolute;inset:0;
-  background:rgba(0,0,0,.5);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity .15s;
-}
+.vcard-hover{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
 .vcard:hover .vcard-hover{opacity:1}
-.play-circle{
-  width:34px;height:34px;
-  background:rgba(124,58,237,.9);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-}
+.play-circle{width:34px;height:34px;background:rgba(124,58,237,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
 .play-circle svg{width:14px;height:14px;fill:#fff;margin-left:2px}
 .vcard-foot{padding:5px 8px}
-.vcard-id{font-size:10px;color:var(--muted);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* ── empty state ── */
-.empty{
-  padding:60px 20px;
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-  width:100%;
-}
+.vcard-id{font-size:10px;color:var(--muted);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:13px;width:100%}
 .empty svg{width:40px;height:40px;margin:0 auto 12px;display:block;opacity:.3}
-
-/* ── fullscreen overlay ── */
-.fs-overlay{
-  position:fixed;
-  inset:0;
-  background:#000;
-  z-index:200;
-  display:none;
-  flex-direction:column;
-}
+.fs-overlay{position:fixed;inset:0;background:#000;z-index:200;display:none;flex-direction:column}
 .fs-overlay.open{display:flex}
-.fs-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;
-  background:rgba(0,0,0,.7);
-  position:absolute;top:0;left:0;right:0;
-  z-index:10;
-  opacity:0;transition:opacity .25s;
-}
+.fs-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,0,0,.7);position:absolute;top:0;left:0;right:0;z-index:10;opacity:0;transition:opacity .25s}
 .fs-overlay:hover .fs-top{opacity:1}
-.fs-title{font-size:12px;color:rgba(255,255,255,.7);font-family:monospace}
-.fs-close{
-  background:rgba(255,255,255,.1);border:none;cursor:pointer;
-  color:#fff;border-radius:6px;padding:6px 10px;
-  font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;
-  transition:background .15s;
-}
+.fs-title{font-size:12px;color:rgba(255,255,255,.6);font-family:monospace}
+.fs-close{background:rgba(255,255,255,.1);border:none;cursor:pointer;color:#fff;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;transition:background .15s}
 .fs-close:hover{background:rgba(255,255,255,.2)}
 .fs-close svg{width:14px;height:14px}
 .fs-player{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .fs-player video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
-
-/* ── toast ── */
-.toast{
-  position:fixed;bottom:60px;left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:8px;padding:8px 16px;
-  font-size:12px;font-weight:500;
-  opacity:0;transition:transform .25s,opacity .25s;
-  pointer-events:none;white-space:nowrap;z-index:99;
-  max-width:90vw;text-align:center;
-}
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:500;opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;white-space:nowrap;z-index:99;max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.success{border-color:rgba(34,197,94,.3);color:var(--success)}
 .toast.error{border-color:rgba(239,68,68,.3);color:var(--danger)}
@@ -180,22 +61,16 @@ html,body{
 <body>
 
 <div class="topbar">
-  <div class="brand">
-    <span class="brand-dot"></span>
-    Videy Player
-  </div>
-  <button class="upload-btn" id="upload-btn">
+  <div class="brand"><span class="brand-dot"></span>Videy Player</div>
+  <button class="upload-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     Upload
     <input type="file" id="file-input" accept="video/*">
   </button>
 </div>
 
-<div class="grid-wrap">
-  <div class="grid" id="grid"></div>
-</div>
+<div class="grid-wrap"><div class="grid" id="grid"></div></div>
 
-<!-- fullscreen overlay -->
 <div class="fs-overlay" id="fs">
   <div class="fs-top">
     <span class="fs-title" id="fs-title"></span>
@@ -204,12 +79,9 @@ html,body{
       Tutup
     </button>
   </div>
-  <div class="fs-player">
-    <video id="fs-video" controls playsinline autoplay></video>
-  </div>
+  <div class="fs-player"><video id="fs-video" controls playsinline autoplay></video></div>
 </div>
 
-<!-- progress bar -->
 <div class="prog-bar" id="prog-bar">
   <div class="prog-top">
     <span class="prog-name" id="prog-name"></span>
@@ -222,144 +94,77 @@ html,body{
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY = 'videy_v2';
+const KEY='videy_v3';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
+function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch{}}
+function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',3000)}
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
+function openFs(id){
+  const url='https://cdn.videy.co/'+id+'.mp4';
+  const v=document.getElementById('fs-video');
+  document.getElementById('fs-title').textContent=id;
+  v.src=url;v.play();
+  document.getElementById('fs').classList.add('open');
+  document.body.style.overflow='hidden';
 }
-function save(arr) {
-  try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch {}
-}
-
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + (type || '');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.className = 'toast', 3000);
-}
-
-function openFullscreen(id) {
-  const url = 'https://cdn.videy.co/' + id + '.mp4';
-  const v = document.getElementById('fs-video');
-  const fs = document.getElementById('fs');
-  document.getElementById('fs-title').textContent = id;
-  v.src = url;
-  v.play();
-  fs.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeFs() {
-  const v = document.getElementById('fs-video');
-  v.pause(); v.src = '';
+function closeFs(){
+  const v=document.getElementById('fs-video');
+  v.pause();v.src='';
   document.getElementById('fs').classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.style.overflow='';
 }
+document.getElementById('fs-close').addEventListener('click',closeFs);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFs()});
 
-document.getElementById('fs-close').addEventListener('click', closeFs);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFs(); });
-
-function render() {
-  const videos = load();
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-
-  if (videos.length === 0) {
-    grid.innerHTML = `<div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      Belum ada video. Klik Upload untuk mulai.
-    </div>`;
+function render(){
+  const videos=load();
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  if(videos.length===0){
+    grid.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Belum ada video. Klik Upload untuk mulai.</div>';
     return;
   }
-
-  videos.forEach((vid, i) => {
-    const url = 'https://cdn.videy.co/' + vid.id + '.mp4';
-    const card = document.createElement('div');
-    card.className = 'vcard';
-    card.innerHTML = `
-      <div class="vcard-thumb">
-        <video src="${url}" muted preload="metadata" playsinline></video>
-        <div class="vcard-hover"><div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
-      </div>
-      <div class="vcard-foot">
-        <span class="vcard-id">${vid.id}</span>
-      </div>`;
-    card.querySelector('.vcard-thumb').addEventListener('click', () => openFullscreen(vid.id));
-
+  videos.forEach(vid=>{
+    const url='https://cdn.videy.co/'+vid.id+'.mp4';
+    const card=document.createElement('div');
+    card.className='vcard';
+    card.innerHTML=`<div class="vcard-thumb"><video src="${url}" muted preload="metadata" playsinline></video><div class="vcard-hover"><div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div></div><div class="vcard-foot"><span class="vcard-id">${vid.id}</span></div>`;
+    card.addEventListener('click',()=>openFs(vid.id));
     grid.appendChild(card);
   });
 }
 
-async function handleFile(file) {
-  if (!file || !file.type.startsWith('video/')) { toast('Hanya file video', 'error'); return; }
-
-  const pb = document.getElementById('prog-bar');
-  const pn = document.getElementById('prog-name');
-  const pp = document.getElementById('prog-pct');
-  const pf = document.getElementById('prog-fill');
-  const ps = document.getElementById('prog-status');
-
-  pn.textContent = file.name;
-  pp.textContent = '0%'; pf.style.width = '0%';
-  ps.textContent = 'Mengupload ke videy.co…';
-  ps.style.color = '';
-  pb.style.display = 'block';
-
-  const form = new FormData();
-  form.append('file', file);
-  document.getElementById('file-input').value = '';
-
-  await new Promise((res, rej) => {
-    const xhr = new XMLHttpRequest();
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable) {
-        const p = Math.round(e.loaded / e.total * 90);
-        pp.textContent = p + '%'; pf.style.width = p + '%';
-      }
-    };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        pp.textContent = '100%'; pf.style.width = '100%';
-        ps.textContent = 'Upload selesai!';
-        try {
-          const d = JSON.parse(xhr.responseText);
-          const id = d.id || d.fileId || d.video_id;
-          if (!id) { rej(new Error('ID tidak ada di respons')); return; }
-          const arr = load();
-          arr.unshift({ id, ts: Date.now() });
-          save(arr);
-          render();
-          toast('Upload berhasil! ' + id, 'success');
-          setTimeout(() => { pb.style.display = 'none'; openFullscreen(id); }, 800);
+async function handleFile(file){
+  if(!file||!file.type.startsWith('video/')){toast('Hanya file video','error');return;}
+  const pb=document.getElementById('prog-bar'),pn=document.getElementById('prog-name'),pp=document.getElementById('prog-pct'),pf=document.getElementById('prog-fill'),ps=document.getElementById('prog-status');
+  pn.textContent=file.name;pp.textContent='0%';pf.style.width='0%';ps.textContent='Mengupload ke videy.co…';ps.style.color='';pb.style.display='block';
+  const form=new FormData();form.append('file',file);document.getElementById('file-input').value='';
+  await new Promise((res,rej)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.upload.onprogress=e=>{if(e.lengthComputable){const p=Math.round(e.loaded/e.total*90);pp.textContent=p+'%';pf.style.width=p+'%';}};
+    xhr.onload=()=>{
+      if(xhr.status>=200&&xhr.status<300){
+        pp.textContent='100%';pf.style.width='100%';ps.textContent='Upload selesai!';
+        try{
+          const d=JSON.parse(xhr.responseText);
+          const id=d.id||d.fileId||d.video_id;
+          if(!id){rej(new Error('ID tidak ada di respons'));return;}
+          const arr=load();arr.unshift({id,ts:Date.now()});save(arr);render();
+          toast('Upload berhasil!','success');
+          setTimeout(()=>{pb.style.display='none';openFs(id);},800);
           res();
-        } catch { rej(new Error('Respons tidak valid')); }
-      } else { rej(new Error('HTTP ' + xhr.status)); }
+        }catch{rej(new Error('Respons tidak valid'));}
+      }else{rej(new Error('HTTP '+xhr.status));}
     };
-    xhr.onerror = () => rej(new Error('Koneksi gagal / CORS blocked'));
-    xhr.ontimeout = () => rej(new Error('Timeout'));
-    xhr.open('POST', 'https://videy.co/api/upload');
-    xhr.timeout = 120000;
-    xhr.send(form);
-  }).catch(err => {
-    ps.textContent = '✗ ' + err.message;
-    ps.style.color = '#ef4444';
-    toast(err.message, 'error');
-    setTimeout(() => { pb.style.display = 'none'; ps.style.color = ''; }, 4000);
-  });
+    xhr.onerror=()=>rej(new Error('Koneksi gagal / CORS blocked'));
+    xhr.ontimeout=()=>rej(new Error('Timeout'));
+    xhr.open('POST','https://videy.co/api/upload');xhr.timeout=120000;xhr.send(form);
+  }).catch(err=>{ps.textContent='✗ '+err.message;ps.style.color='#ef4444';toast(err.message,'error');setTimeout(()=>{pb.style.display='none';ps.style.color='';},4000);});
 }
 
-document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) handleFile(e.target.files[0]);
-});
-
-document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => {
-  e.preventDefault();
-  const f = e.dataTransfer.files[0];
-  if (f) handleFile(f);
-});
-
+document.getElementById('file-input').addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0])});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 render();
 </script>
 </body>
