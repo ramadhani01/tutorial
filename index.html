@@ -116,11 +116,8 @@ html,body{
   display:flex;align-items:center;justify-content:center;
 }
 .play-circle svg{width:14px;height:14px;fill:#fff;margin-left:2px}
-.vcard-foot{padding:6px 8px;display:flex;align-items:center;justify-content:space-between}
-.vcard-id{font-size:10px;color:var(--muted);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
-.vcard-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;border-radius:4px;transition:color .15s;display:flex;align-items:center}
-.vcard-del:hover{color:var(--danger)}
-.vcard-del svg{width:12px;height:12px}
+.vcard-foot{padding:5px 8px}
+.vcard-id{font-size:10px;color:var(--muted);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── empty state ── */
 .empty{
@@ -287,19 +284,9 @@ function render() {
       </div>
       <div class="vcard-foot">
         <span class="vcard-id">${vid.id}</span>
-        <button class="vcard-del" title="Hapus">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-        </button>
       </div>`;
     card.querySelector('.vcard-thumb').addEventListener('click', () => openFullscreen(vid.id));
-    card.querySelector('.vcard-del').addEventListener('click', e => {
-      e.stopPropagation();
-      const arr = load();
-      arr.splice(i, 1);
-      save(arr);
-      render();
-      toast('Video dihapus', '');
-    });
+
     grid.appendChild(card);
   });
 }
