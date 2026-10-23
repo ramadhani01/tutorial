@@ -16,6 +16,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,11,13,.92);backdrop-filter:blur(8px);z-index:10}
 .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
 .brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .3s;margin-left:4px}
+.sync-dot.ok{background:var(--success)}
+.sync-dot.err{background:var(--danger)}
 .upload-btn{display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:500;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap;position:relative;overflow:hidden}
 .upload-btn:hover{background:#6D28D9}
 .upload-btn:active{transform:scale(.97)}
@@ -61,7 +64,11 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
 <body>
 
 <div class="topbar">
-  <div class="brand"><span class="brand-dot"></span>Videy Player</div>
+  <div class="brand">
+    <span class="brand-dot"></span>
+    Videy Player
+    <span class="sync-dot" id="sync-dot" title="Status sinkronisasi"></span>
+  </div>
   <button class="upload-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     Upload
@@ -94,78 +101,129 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='videy_v3';
-function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
-function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch{}}
-function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',3000)}
+const syncDot = document.getElementById('sync-dot');
 
-function openFs(id){
-  const url='https://cdn.videy.co/'+id+'.mp4';
-  const v=document.getElementById('fs-video');
-  document.getElementById('fs-title').textContent=id;
-  v.src=url;v.play();
+function toast(m, t) {
+  const e = document.getElementById('toast');
+  e.textContent = m;
+  e.className = 'toast show ' + (t || '');
+  clearTimeout(e._t);
+  e._t = setTimeout(() => e.className = 'toast', 3000);
+}
+
+function openFs(id) {
+  const url = 'https://cdn.videy.co/' + id + '.mp4';
+  const v = document.getElementById('fs-video');
+  document.getElementById('fs-title').textContent = id;
+  v.src = url; v.play();
   document.getElementById('fs').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
-function closeFs(){
-  const v=document.getElementById('fs-video');
-  v.pause();v.src='';
+function closeFs() {
+  const v = document.getElementById('fs-video');
+  v.pause(); v.src = '';
   document.getElementById('fs').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 }
-document.getElementById('fs-close').addEventListener('click',closeFs);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFs()});
+document.getElementById('fs-close').addEventListener('click', closeFs);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFs(); });
 
-function render(){
-  const videos=load();
-  const grid=document.getElementById('grid');
-  grid.innerHTML='';
-  if(videos.length===0){
-    grid.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Belum ada video. Klik Upload untuk mulai.</div>';
+function renderGrid(videos) {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if (!videos || videos.length === 0) {
+    grid.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Belum ada video. Klik Upload untuk mulai.</div>';
     return;
   }
-  videos.forEach(vid=>{
-    const url='https://cdn.videy.co/'+vid.id+'.mp4';
-    const card=document.createElement('div');
-    card.className='vcard';
-    card.innerHTML=`<div class="vcard-thumb"><video src="${url}" muted preload="metadata" playsinline></video><div class="vcard-hover"><div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div></div><div class="vcard-foot"><span class="vcard-id">${vid.id}</span></div>`;
-    card.addEventListener('click',()=>openFs(vid.id));
+  videos.forEach(vid => {
+    const url = 'https://cdn.videy.co/' + vid.id + '.mp4';
+    const card = document.createElement('div');
+    card.className = 'vcard';
+    card.innerHTML = `<div class="vcard-thumb"><video src="${url}" muted preload="metadata" playsinline></video><div class="vcard-hover"><div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div></div><div class="vcard-foot"><span class="vcard-id">${vid.id}</span></div>`;
+    card.addEventListener('click', () => openFs(vid.id));
     grid.appendChild(card);
   });
 }
 
-async function handleFile(file){
-  if(!file||!file.type.startsWith('video/')){toast('Hanya file video','error');return;}
-  const pb=document.getElementById('prog-bar'),pn=document.getElementById('prog-name'),pp=document.getElementById('prog-pct'),pf=document.getElementById('prog-fill'),ps=document.getElementById('prog-status');
-  pn.textContent=file.name;pp.textContent='0%';pf.style.width='0%';ps.textContent='Mengupload ke videy.co…';ps.style.color='';pb.style.display='block';
-  const form=new FormData();form.append('file',file);document.getElementById('file-input').value='';
-  await new Promise((res,rej)=>{
-    const xhr=new XMLHttpRequest();
-    xhr.upload.onprogress=e=>{if(e.lengthComputable){const p=Math.round(e.loaded/e.total*90);pp.textContent=p+'%';pf.style.width=p+'%';}};
-    xhr.onload=()=>{
-      if(xhr.status>=200&&xhr.status<300){
-        pp.textContent='100%';pf.style.width='100%';ps.textContent='Upload selesai!';
-        try{
-          const d=JSON.parse(xhr.responseText);
-          const id=d.id||d.fileId||d.video_id;
-          if(!id){rej(new Error('ID tidak ada di respons'));return;}
-          const arr=load();arr.unshift({id,ts:Date.now()});save(arr);render();
-          toast('Upload berhasil!','success');
-          setTimeout(()=>{pb.style.display='none';openFs(id);},800);
-          res();
-        }catch{rej(new Error('Respons tidak valid'));}
-      }else{rej(new Error('HTTP '+xhr.status));}
-    };
-    xhr.onerror=()=>rej(new Error('Koneksi gagal / CORS blocked'));
-    xhr.ontimeout=()=>rej(new Error('Timeout'));
-    xhr.open('POST','https://videy.co/api/upload');xhr.timeout=120000;xhr.send(form);
-  }).catch(err=>{ps.textContent='✗ '+err.message;ps.style.color='#ef4444';toast(err.message,'error');setTimeout(()=>{pb.style.display='none';ps.style.color='';},4000);});
+async function loadVideos() {
+  try {
+    const r = await fetch('/api/videos');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    renderGrid(await r.json());
+    syncDot.classList.remove('err'); syncDot.classList.add('ok');
+  } catch (e) {
+    syncDot.classList.remove('ok'); syncDot.classList.add('err');
+    toast('Gagal memuat daftar video', 'error');
+  }
 }
 
-document.getElementById('file-input').addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0])});
-document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);});
-render();
+async function saveVideo(id) {
+  try {
+    const r = await fetch('/api/videos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    renderGrid(await r.json());
+  } catch (e) {
+    toast('Video terupload, tapi gagal menyimpan daftar', 'error');
+  }
+}
+
+async function handleFile(file) {
+  if (!file || !file.type.startsWith('video/')) { toast('Hanya file video', 'error'); return; }
+  const pb = document.getElementById('prog-bar'),
+        pn = document.getElementById('prog-name'),
+        pp = document.getElementById('prog-pct'),
+        pf = document.getElementById('prog-fill'),
+        ps = document.getElementById('prog-status');
+  pn.textContent = file.name;
+  pp.textContent = '0%'; pf.style.width = '0%';
+  ps.textContent = 'Mengupload ke videy.co…'; ps.style.color = '';
+  pb.style.display = 'block';
+  const form = new FormData();
+  form.append('file', file);
+  document.getElementById('file-input').value = '';
+
+  await new Promise((res, rej) => {
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) { const p = Math.round(e.loaded / e.total * 90); pp.textContent = p + '%'; pf.style.width = p + '%'; }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        pp.textContent = '100%'; pf.style.width = '100%'; ps.textContent = 'Upload selesai!';
+        try {
+          const d = JSON.parse(xhr.responseText);
+          const id = d.id || d.fileId || d.video_id;
+          if (!id) { rej(new Error('ID tidak ada di respons')); return; }
+          saveVideo(id).then(() => {
+            toast('Upload berhasil!', 'success');
+            setTimeout(() => { pb.style.display = 'none'; openFs(id); }, 800);
+            res();
+          });
+        } catch { rej(new Error('Respons tidak valid')); }
+      } else { rej(new Error('HTTP ' + xhr.status)); }
+    };
+    xhr.onerror = () => rej(new Error('Koneksi gagal / CORS blocked'));
+    xhr.ontimeout = () => rej(new Error('Timeout'));
+    xhr.open('POST', 'https://videy.co/api/upload');
+    xhr.timeout = 120000;
+    xhr.send(form);
+  }).catch(err => {
+    ps.textContent = '✗ ' + err.message;
+    ps.style.color = '#ef4444';
+    toast(err.message, 'error');
+    setTimeout(() => { pb.style.display = 'none'; ps.style.color = ''; }, 4000);
+  });
+}
+
+document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+loadVideos();
 </script>
 </body>
 </html>
